@@ -1,0 +1,116 @@
+{% load crispy_forms_tags %}
+{% load static %}
+
+
+<div class="row justify-content-center mt-3 mb-5">
+    <div class="col-md-5 col-sm-12">
+        <form method="POST" class="comment-form">
+            {% csrf_token %}
+            {{ form | crispy }}
+            <div class="d-grid gap-2">
+                <button class="btn btn-success mt-3">Submit!</button>
+            </div>
+        </form>
+        <h4 class="row justify-content-center">Total Comments: {{comment_count}}</h4>
+    </div>
+</div>
+
+{% if comments.0 %}
+    <div class="row justify-content-center mt-3">
+        <div class="col-md-5 col-sm-12 position-relative">
+            {% if comments.has_previous %}
+                <a href="?page=1">&laquo First</a>
+                <a href="?page={{ comments.previous_page_number }}">Previous</a>
+            {% endif %}
+
+            Page {{ comments.number }} of {{ comments.paginator.num_pages }}
+
+            {% if comments.has_next %}
+                <a href="?page={{ comments.next_page_number }}">Next</a>
+                <a href="?page={{ comments.paginator.num_pages }}">Last &raquo</a>
+            {% endif %}
+        </div>
+    </div>
+{% else %}
+    
+{% endif %}
+<div class="infinite-container">
+    {% for comment in comments %}
+        <div class="infinite-item comments-container">
+            {% if comment.is_parent %} 
+                <div class="row justify-content-center mt-3">
+                {% if comment.children %}
+                    <div class="col-md-5 col-sm-12">
+                {% else %}
+                    <div class="col-md-5 col-sm-12 border-bottom">
+                {% endif %}
+                        <p>
+                            <div>
+                                <a href="{% url 'show_profile_page' comment.author.profile.pk %}">
+                                    <img class="round-circle post-img" height="45" width="45" src="{{ comment.author.profile.picture.url }}" />
+                                </a>
+                                <p class="post-text">
+                                    <a class="text-primary post-link" href="{% url 'show_profile_page' comment.author.profile.pk %}">@{{ comment.author }}</a> {{ comment.created_on }}
+                                </p>
+                            </div>
+                            {% if request.user == comment.author %}
+                                <a href="{% url 'comment-delete' post.pk comment.pk %}" class="edit-color"><i class="fas fa-trash"></i></a>
+                            {% endif %}
+                        </p>
+                        <p>{{ comment.comment }}</p>
+                        <div class="d-flex flex-row">
+                            <form method="POST" action="{% url 'comment-like' post.pk comment.pk %}" class="like-form" id="{{comment.pk}}">
+                                {% csrf_token %}
+                                {% if request.user in comment.likes.all %}
+                                    <input type="hidden" name="comment_pk" value="{{ comment.pk }}">
+                                    <button class="remove-default-btn like-btn{{comment.pk}}" type="submit">
+                                        <i class="far fa-thumbs-up like-icon{{comment.pk}} btn-success"> <span class="like_count{{comment.pk}}">{{ comment.likes.all.count }}</span></i>
+                                    </button>
+                                {% else %}
+                                    <input type="hidden" name="comment_pk" value="{{ comment.pk }}">
+                                    <button class="remove-default-btn like-btn{{comment.pk}}" type="submit">
+                                        <i class="far fa-thumbs-up like-icon{{comment.pk}}" > <span class="like_count{{comment.pk}}">{{ comment.likes.all.count }}</span></i>
+                                    </button>
+                                {% endif %}
+                            </form>
+                            <form method="POST" action="{% url 'comment-dislike' post.pk comment.pk %}" class="dislike-form" id="{{comment.pk}}">
+                                {% csrf_token %}
+                                {% if request.user in comment.dislikes.all %}
+                                    <input type="hidden" name="comment_pk" value="{{ comment.pk }}">
+                                    <button class="remove-default-btn dislike-btn{{comment.pk}}" type="submit">
+                                        <i class="far fa-thumbs-down dislike-icon{{comment.pk}} btn-danger" > <span class="dislike_count{{comment.id}}">{{ comment.dislikes.all.count }}</span></i>
+                                    </button>
+                                {% else %}
+                                    <input type="hidden" name="comment_pk" value="{{ comment.pk }}">
+                                    <button class="remove-default-btn dislike-btn{{comment.pk}}" type="submit">
+                                        <i class="far fa-thumbs-down dislike-icon{{comment.pk}}" > <span class="dislike_count{{comment.pk}}">{{ comment.dislikes.all.count }}</span></i>
+                                    </button>
+                                {% endif %}
+                            </form> &nbsp;&nbsp;
+                            <div>
+                                <button class="remove-default-btn reply-button"><a href="{% url 'view-comment-reply' comment.pk %}">Replies: {{comment.children.all.count}}</a></button>
+                            </div>
+                            &nbsp;&nbsp;
+                            <div>
+                                <button class="remove-default-btn"><i class="far fa-comment-dots" onclick="commentReplyToggle('n{{ comment.pk }}')"></i></button>
+                            </div>
+                        </div>
+                    </div> 
+                    <div class="reply-section">
+                        {% include 'social/replies.html' %}
+                    </div>
+                </div>
+                {% if comment.children %}
+                    <div class="row justify-content-center mt-3"><div class="col-md-5 col-sm-12 border-bottom"></div></div>
+                {% endif %}  
+            {% endif %}
+        </div>
+    {% endfor %}
+</div>
+
+
+
+
+
+
+

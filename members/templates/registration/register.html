@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<div class="fh5co-parallax" style="background-image: url(/static/images/home-image-3.jpg);" data-stellar-background-ratio="0.5">
+	<div class="overlay"></div>
+	<div class="container">
+		<div class="row">
+			<div class="col-md-8 col-md-offset-2 col-sm-12 col-sm-offset-0 col-xs-12 col-xs-offset-0 text-center fh5co-table">
+				<div class="fh5co-intro fh5co-table-cell animate-box loginform" id="registerForm" data-branches-url="{% url 'ajax_load_citys' %}" novalidate>
+					<h1 class="text-center">Register</h1>
+					<form method='POST'>
+						{% csrf_token %}
+						<div class="col-md-6">
+							<div class="form-group">
+								{{ form.username }}
+							</div>
+						</div>
+						<div class="col-md-6">
+							<div class="form-group">
+								{{ form.email }}
+							</div>
+						</div>
+						<div class="col-md-6">
+							<div class="form-group">
+								{{ form.first_name }}
+							</div>
+						</div>
+						<div class="col-md-6">
+							<div class="form-group">
+								{{ form.last_name }}
+							</div>
+						</div>
+						<div class="col-md-6">
+							<div class="form-group">
+								{{ form.state }}
+							</div>
+						</div>
+						<div class="col-md-6">
+							<div class="form-group">
+								{{ form.city }}
+							</div>
+						</div>
+						<div class="col-md-6">
+							<div class="form-group">
+								{{ form.password1 }}
+							</div>
+						</div>
+						<div class="col-md-6">
+							<div class="form-group">
+								{{ form.password2 }}
+							</div>
+						</div>
+						{% comment %} <div class="col-md-12">
+							<div class="form-group">
+								<textarea name="" class="form-control" id="" cols="30" rows="7" placeholder="Message"></textarea>
+							</div>
+						</div> {% endcomment %}
+						<div class="col-md-12">
+							<div class="form-group">
+								<input type="submit" value="Login" class="btn btn-primary">
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+</div><!-- end: fh5co-parallax -->
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script>
+	$("#id_state").change(function () {
+	var url = $("#registerForm").attr("data-branches-url");  
+	var stateId = $(this).val();  
+
+	$.ajax({                      
+		url: url,                    
+		data: {
+		'state': stateId       
+		},
+		success: function (data) {  
+		$("#id_city").html(data);  
+		}
+	});
+
+	});
+</script>
+
+{% endblock %}
+
+
+
+<form method='POST'>
+	{% csrf_token %}
+	{{ form.as_p }}
+	<button class="btn btn-secondary">Register</button> 
+</form>
+
+
+
+
+
+
+
+
+
+
+
+<div class="col-md-6 animate-box">
+	<div class="row">
+		<div class="col-md-6">
+			<div class="form-group">
+				<input type="text" class="form-control" placeholder="Name">
+			</div>
+		</div>
+		<div class="col-md-6">
+			<div class="form-group">
+				<input type="text" class="form-control" placeholder="Email">
+			</div>
+		</div>
+		<div class="col-md-12">
+			<div class="form-group">
+				<textarea name="" class="form-control" id="" cols="30" rows="7" placeholder="Message"></textarea>
+			</div>
+		</div>
+		<div class="col-md-12">
+			<div class="form-group">
+				<input type="submit" value="Send Message" class="btn btn-primary">
+			</div>
+		</div>
+	</div>
+</div>
+
+<h1 style="display: none;">login-test</h1>
+<div class="flexbox-container">
+	<div class="flexbox-item login-form">
+		<h1>Login</h1> 
+		<br/>
+		<div class="form-group">                                         
+			<form method='POST'>
+				{% csrf_token %}
+					<div class="mb-3">
+						<input type="text" class="form-control" name="username" placeholder="username">
+						<div id="emailHelp" class="form-text"></div>
+					</div>
+					<div class="mb-3">
+						<input type="password" class="form-control" name="password" placeholder="password">
+					</div>
+				<button class="btn btn-secondary">Login</button> 
+				<br><br>
+				Not a User? <a href="{% url 'register' %}">Register here!<a><br>
+				<a href="{% url 'password_reset' %}">Forgot Username/Password?</a>	
+			</form>
+		</div>
+	</div>
+</div>

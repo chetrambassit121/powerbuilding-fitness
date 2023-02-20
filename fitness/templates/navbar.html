@@ -1,0 +1,68 @@
+{% load static %}
+<div id="fh5co-header">
+    <header id="fh5co-header-section">
+        <div class="container">
+            <div class="nav-header">
+                <a href="#" class="js-fh5co-nav-toggle fh5co-nav-toggle"><i></i></a>
+                <h1 id="fh5co-logo"><a href="{% url 'home' %}">Power<span>Building</span></a></h1>
+                <!-- START #fh5co-menu-wrap -->
+                <nav id="fh5co-menu-wrap" role="navigation">
+                    <ul class="sf-menu" id="fh5co-primary-menu">
+                        {% comment %} <li class="active">
+                            <a href="{% url 'index' %}">Home</a>
+                        </li> {% endcomment %}
+                        {% comment %} <li>
+                            <a href="classes" class="fh5co-sub-ddown">Classes</a>
+                            <ul class="fh5co-sub-menu">
+                                <li><a href="#">Fitness</a></li>
+                                <li><a href="#">Branding &amp; Identity</a></li>
+                                <li><a href="#">UI Animation</a></li>
+                                <li><a href="#">Copywriting</a></li>
+                                <li><a href="#">Photography</a></li> 
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="{% url 'schedule' %}">Schedule</a>
+                        </li> {% endcomment %}
+                        <li><a href="{% url 'trainer' %}">Trainers</a></li>
+                        <li><a href="{% url 'about' %}">About</a></li>
+                        <li><a href="{% url 'contact' %}">Contact</a></li>
+                        {% if user.is_authenticated %}
+                            <li><a href="#"><img class="round-circle post-img" height="35" width="35" src="{{ request.user.profile.picture.url }}" /></a></li>
+                            <li class="dropdown">
+                                <button class="btn dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                                User Settings
+                                </button>
+                                <ul class="dropdown-menu " aria-labelledby="dropdownMenuButton1">
+                                    {% comment %} <li><a class="dropdown-item" href="{% url 'edit_profile' request.user.profile.pk %}">Edit User Settings</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'edit_profile_page' request.user.profile.pk %}">Edit Profile Page</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'show_profile_page' request.user.profile.pk %}">Show Profile Page</a></li> {% endcomment %}
+                                    <li><a class="dropdown-item" href="#">Edit User Settings</a></li>
+                                    <li><a class="dropdown-item" href="#">Edit Profile Page</a></li>
+                                    <li><a class="dropdown-item" href="#">Show Profile Page</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
+                                </ul>
+                            </li>              
+                        {% else %}
+                            <li><a href="{% url 'login' %}">Login</a></li>
+                            <li><a href="{% url 'register' %}">Register</a></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>		
+</div>
+{% comment %} <div id="fh5co-header">
+    <header id="fh5co-header-section">
+        <div class="container">
+            <a href="#" class="js-fh5co-nav-toggle fh5co-nav-toggle"><i></i></a>
+            <h1 id="fh5co-logo-2"><a href="{% url 'index' %}">Power<span>Building</span>-Social</a></h1>
+            <h6><a href="{% url 'login' %}">login</a> or <a href="{% url 'register' %}">register</a></h6>  
+            <form class="" role="search">
+                <input class="" type="search" placeholder="Search" aria-label="Search">
+                <button class="btn btn-outline-success" type="submit">Search</button>
+            </form>
+        </div>
+    </header>
+</div> {% endcomment %}

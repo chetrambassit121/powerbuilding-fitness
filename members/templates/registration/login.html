@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<div class="fh5co-parallax" style="background-image: url(/static/images/home-image-3.jpg);" data-stellar-background-ratio="0.5">
+	<div class="overlay"></div>
+	<div class="container">
+		<div class="row">
+			<div class="col-md-8 col-md-offset-2 col-sm-12 col-sm-offset-0 col-xs-12 col-xs-offset-0 text-center fh5co-table">
+				<div class="fh5co-intro fh5co-table-cell animate-box loginform">
+					<h1 class="text-center">Login</h1>
+					<form method='POST'>
+						{% csrf_token %}
+						<div class="row-md-2">
+							<div class="form-group">
+								<input type="text" class="form-control" name="username" placeholder="Username">
+							</div>
+						</div>
+						<div class="row-md-2">
+							<div class="form-group">
+								<input type="password" class="form-control" name="password" placeholder="Password">
+							</div>
+						</div>
+						{% comment %} <div class="col-md-12">
+							<div class="form-group">
+								<textarea name="" class="form-control" id="" cols="30" rows="7" placeholder="Message"></textarea>
+							</div>
+						</div> {% endcomment %}
+						<div class="col-md-12">
+							<div class="form-group">
+								<input type="submit" value="Login" class="btn btn-primary">
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+</div><!-- end: fh5co-parallax -->
+
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="row">
+	<div class="col-md-3"></div>
+	<div class="col-md-6">
+		<div class="row login-form">
+			<div class="col-md-2"></div>
+			<div class="col-md-8">
+				<div class="card mt-5">
+					{% comment %} <img src="https://mta-instagram-clone.herokuapp.com/static/img/instagram-wordmark.svg" class="card-img-top" alt="..."> {% endcomment %}
+					{% comment %} <h5 class="card-title text-muted centered">Login</h5> {% endcomment %}
+				<div class="card-body">
+				<p>Login as John Doe</p>
+				<form action="{%url 'login'%}" method="POST">
+					{% csrf_token%}
+					<div class="form-group">
+						<input class="form-control form-control-sm" type="text" name="username" value="{{data.username}}" placeholder="johndoe1">
+					</div>
+					<div class="form-group">
+						<input class="form-control form-control-sm" type="password" name="password" placeholder="Password123!">
+					</div>
+				<input type="submit" class="btn btn-sm btn-block btn-primary" value="Login">
+				{% comment %} <div class="row">
+					<div class="col-md-5">
+						<hr>
+					</div>
+					<div class="col-md-2">
+						<p class="text-muted">OR</p>
+					</div>
+					<div class="col-md-5">
+						<hr>
+					</div>
+					<a href="" class="btn btn-sm btn-block btn-primary"><i class="fa fa-facebook"></i> Login with Facebook</a>
+				</div> {% endcomment %}
+			</div>
+		</div>
+		<div class="card mt-4">
+			<div class="card-body">
+				<p>
+				Need an account? <a href="{% url 'register' %}">Register</a>
+				</p>
+			</div>
+		</div>
+		<div class="card mt-4">
+			<div class="card-body">
+				<p>
+				Forgot Password? <a href="{% url 'password_reset' %}">Reset it here</a>
+				</p>
+			</div>
+		</div>
+		</div>
+			<div class="col-md-2"></div>
+		</div>
+	</div>
+	<div class="col-md-3"></div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="row">
+	<div class="col-md-8 col-md-offset-2 col-sm-12 col-sm-offset-0 col-xs-12 col-xs-offset-0 text-center fh5co-table loginform">
+		<div class="fh5co-intro fh5co-table-cell animate-box">
+			<div class="form-group">                                         
+				<form method='POST'>
+					{% csrf_token %}
+					<div class="">
+						<input type="text" class="" name="username" placeholder="username">
+						<div id="emailHelp" class="form-text"></div>
+					</div>
+					<div class="">
+						<input type="password" class="" name="password" placeholder="password">
+					</div>
+					<button class="btn btn-secondary">Login</button> 
+					<br><br>
+					Not a User? <a href="{% url 'register' %}">Register here!<a><br>
+					<a href="{% url 'password_reset' %}">Forgot Username/Password?</a>	
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="col-md-6 animate-box">
+	<div class="row">
+		<div class="col-md-6">
+			<div class="form-group">
+				<input type="text" class="form-control" placeholder="Name">
+			</div>
+		</div>
+		<div class="col-md-6">
+			<div class="form-group">
+				<input type="text" class="form-control" placeholder="Email">
+			</div>
+		</div>
+		<div class="col-md-12">
+			<div class="form-group">
+				<textarea name="" class="form-control" id="" cols="30" rows="7" placeholder="Message"></textarea>
+			</div>
+		</div>
+		<div class="col-md-12">
+			<div class="form-group">
+				<input type="submit" value="Send Message" class="btn btn-primary">
+			</div>
+		</div>
+	</div>
+</div>
+
+<h1 style="display: none;">login-test</h1>
+<div class="flexbox-container">
+	<div class="flexbox-item login-form">
+		<h1>Login</h1> 
+		<br/>
+		<div class="form-group">                                         
+			<form method='POST'>
+				{% csrf_token %}
+					<div class="mb-3">
+						<input type="text" class="form-control" name="username" placeholder="username">
+						<div id="emailHelp" class="form-text"></div>
+					</div>
+					<div class="mb-3">
+						<input type="password" class="form-control" name="password" placeholder="password">
+					</div>
+				<button class="btn btn-secondary">Login</button> 
+				<br><br>
+				Not a User? <a href="{% url 'register' %}">Register here!<a><br>
+				<a href="{% url 'password_reset' %}">Forgot Username/Password?</a>	
+			</form>
+		</div>
+	</div>
+</div>

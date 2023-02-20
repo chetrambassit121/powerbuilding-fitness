@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Delete{% endblock %}
+{% block content %}
+
+<div class="flexbox-container">
+	<div class="flexbox-item login-form">
+        <form method="post">{% csrf_token %}
+            <p>Are you sure you want to delete "{{ user }}"?</p>
+            <button type="submit" class="btn btn-danger">Confirm</button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

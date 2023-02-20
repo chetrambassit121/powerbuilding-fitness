@@ -1,0 +1,847 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% block content %}
+
+<div class="container">
+    <div class="row mt-5">
+        <div class="col-md-5 col-sm-6">
+            <a href="{% url 'post-list' %}" class="btn btn-light ">Back To Posts</a>
+        </div>
+    </div>
+    <div class="row justify-content-center mt-3">
+        <div class="col-md-5 col-sm-12 border-bottom">
+            {% if post.shared_user %}
+                <div>
+                    <a href="{% url 'show_profile_page' post.shared_user.profile.pk %}">
+                        <img class="round-circle post-img" height="45" width="45" src="{{ post.shared_user.profile.picture.url }}" />
+                    </a>
+                    <p class="post-text">
+                        <a class="text-primary post-link" href="{% url 'show_profile_page' post.shared_user.profile.pk %}">@{{ post.shared_user }}</a> shared a post on {{ post.shared_on }}
+                    </p>
+                </div>
+            {% else %}
+                <div>
+                    <a href="{% url 'show_profile_page' post.author.profile.pk %}">
+                        <img class="round-circle post-img" height="45" width="45" src="{{ post.author.profile.picture.url }}" />
+                    </a>
+                    <p class="post-text">
+                        <a class="text-primary post-link" href="{% url 'show_profile_page' post.author.profile.pk %}">@{{ post.author }}</a> {{ post.created_on }}
+                    </p>
+                </div>
+            {% endif %}
+            {% if request.user == post.author %}
+                <a href="{% url 'post-edit' post.pk %}" class="edit-color"><i class="far fa-edit" style="color: green"></i></a>
+                <a href="{% url 'post-delete' post.pk %}" class="edit-color"><i class="fas fa-trash" style="color: red"></i></a>
+                <small>**{{ user.username }} can edit/delete this post**</small>
+            {% elif request.user == post.shared_user %}
+                <a href="{% url 'post-delete' post.pk %}" class="edit-color"><i class="fas fa-trash" style="color: red"></i></a>
+                <small>**{{ user.username }} can delete this Shared Post**</small>
+            {% endif %}
+            <br><br>
+            {% if post.shared_body %}
+                <div class="position-relative mb-3 body">
+                    <p>{{ post.shared_body }}</p>
+                    <a href="{% url 'post-detail' post.pk %}" class="stretched-link"></a>
+                </div>
+                <div class="shared-post">
+                    <a href="{% url 'show_profile_page' post.author.profile.pk %}">
+                        <img class="round-circle post-img" height="45" width="45" src="{{ post.author.profile.picture.url }}" />
+                    </a>
+                    <p class="post-text">
+                        <a class="text-primary post-link" href="{% url 'show_profile_page' post.author.profile.pk %}">@{{ post.author }}</a> {{ post.created_on }}
+                    </p>
+                </div>
+            {% endif %}
+            <div class="shared-post position-relative">
+                <div class="body">
+                    <p>{{ post.body }}</p>
+                </div>
+                {% if post.image %}
+                  <img src="{{ post.image.url }}" class="post-image" />
+                {% endif %}
+                {% if post.video %}
+                    <video class="embed-responsive embed-responsive-16by9 post-image" controls="controls" >
+                        <source src="{{post.video.url}}" type="video/mp4" />
+                    </video>
+                {% endif %}
+            </div>
+
+            <div class="d-flex flex-row">
+                <form method="POST" action="{% url 'post-detail-like' post.pk %}">
+                    {% csrf_token %}
+                    {% if user not in post.likes.all %}
+                        <input type="hidden" name="next" value="{{ request.path }}">
+                        <button class="remove-default-btn" type="submit">
+                            <i class="far fa-thumbs-up" ><span>{{ post.likes.all.count }}</span></i>
+                        </button>
+                    {% else %}
+                        <input type="hidden" name="next" value="{{ request.path }}">
+                        <button class="remove-default-btn" type="submit">
+                            <i class="far fa-thumbs-up btn-success" ><span>{{ post.likes.all.count }}</span></i>
+                        </button>
+                    {% endif %}
+                </form>
+                <form method="POST" action="{% url 'post-detail-dislike' post.pk %}">
+                    {% csrf_token %}
+                    {% if user not in post.dislikes.all %}
+                        <input type="hidden" name="next" value="{{ request.path }}">
+                        <button class="remove-default-btn" type="submit">
+                            <i class="far fa-thumbs-down" > <span>{{ post.dislikes.all.count }}</span></i>
+                        </button>
+                    {% else %}
+                        <input type="hidden" name="next" value="{{ request.path }}">
+                        <button class="remove-default-btn" type="submit">
+                            <i class="far fa-thumbs-down btn-danger"> <span>{{ post.dislikes.all.count }}</span></i>
+                        </button>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="main-comment-section">
+        {% include 'social/comments.html' %}
+    </div>
+    <div class="row justify-content-center mt-3">
+        <div class="col-md-5 col-sm-12 position-relative">
+          {% if comments.has_previous %}
+            <a href="?page=1">&laquo First</a>
+            <a href="?page={{ comments.previous_page_number }}">Previous</a>
+          {% endif %}
+
+          Page {{ comments.number }} of {{ comments.paginator.num_pages }}
+
+          {% if comments.has_next %}
+            <a href="?page={{ comments.next_page_number }}">Next</a>
+            <a href="?page={{ comments.paginator.num_pages }}">Last &raquo</a>
+          {% endif %}
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function(){
+        $('.like-form').submit(function(e){
+            e.preventDefault();
+            const comment_pk=$(this).attr('id')
+            const likeText = $(`.like-btn${comment_pk}`).text()
+            const trim = $.trim(likeText)
+            const url=$(this).attr('action') 
+            let res;
+            const like = $(`.like_count${comment_pk}`).text()
+            $.ajax({
+                method:"POST",
+                url:url,
+                data:{
+                    'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val(),
+                    'comment_pk':comment_pk,
+                },
+                success:function(response){
+                    if(response.liked===true){
+                        $(`.like-icon${comment_pk}`).addClass('btn-success')
+                    }else{
+                        $(`.like-icon${comment_pk}`).removeClass('btn-success')
+                    }
+                    if(response.disliked===true){
+                        $(`.dislike-icon${comment_pk}`).addClass("btn-danger")
+                    }else{
+                        $(`.dislike-icon${comment_pk}`).removeClass("btn-danger")
+                    }
+                    likes=$(`.like_count${comment_pk}`).text(response.likes_count)
+                    parseInt(likes)
+                    dislikes=$(`.dislike_count${comment_pk}`).text(response.dislikes_count)
+                    parseInt(dislikes)
+                },
+                error:function(response){
+                    console.log("Failed ", response)
+                }
+            })
+        });
+
+        $('.dislike-form').submit(function(e){
+            e.preventDefault();  
+            const comment_pk = $(this).attr('id')
+            const dislikeText = $(`.dislike-btn${comment_pk}`).text()
+            const trim = $.trim(dislikeText)
+            const url =$(this).attr('action') 
+            let res;
+            const dislike = $(`.dislike_count${comment_pk}`).text()
+            
+            $.ajax({
+                method:"POST",
+                url:url,
+                data:{
+                    'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val(),
+                    'comment_pk':comment_pk,
+                },
+                success:function(response){
+                    if(response.disliked===true){
+                      $(`.dislike-icon${comment_pk}`).addClass("btn-danger")
+                    }else{
+                      $(`.dislike-icon${comment_pk}`).removeClass("btn-danger")
+                    }
+
+                    if(response.liked===true){
+                      $(`.like-icon${comment_pk}`).addClass('btn-success')
+                    }else{
+                      $(`.like-icon${comment_pk}`).removeClass('btn-success')
+                    }
+                    likes=$(`.like_count${comment_pk}`).text(response.likes_count)
+                    parseInt(likes)
+                    dislikes=$(`.dislike_count${comment_pk}`).text(response.dislikes_count)
+                    parseInt(dislikes)
+                },
+                error:function(response){
+                    console.log('failed', response)
+                }
+            }) 
+        });
+
+    });
+</script>
+
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ <form method="POST" action="{% url 'comment-like' post.pk comment.id %}" class="like-form" id={{comment.id}}>
+                            {% csrf_token %}
+                            {% if request.user in comment.likes.all %}
+                                <input type="hidden" name="comment_id" value="{{ comment.id }}">
+                                <button class="remove-default-btn like-btn{{comment.id}}" type="submit">
+                                    <i class="far fa-thumbs-up like-icon{{comment.id}} btn-success" style="color: white;"> <span class="like_count{{comment.id}}">{{ comment.likes.all.count }}</span></i>
+                                </button>
+                            {% else %}
+                                <input type="hidden" name="comment_id" value="{{ comment.id }}">
+                                <button class="remove-default-btn like-btn{{comment.id}}" type="submit">
+                                    <i class="far fa-thumbs-up like-icon{{comment.id}}" style="color: white;"> <span class="like_count{{comment.id}}">{{ comment.likes.all.count }}</span></i>
+                                </button>
+                            {% endif %}
+                        </form>
+                        <form method="POST" action="{% url 'comment-dislike' post.pk comment.id %}" class="dislike-form" id={{comment.id}}>
+                            {% csrf_token %}
+                            {% if request.user in comment.dislikes.all %}
+                                <input type="hidden" name="comment_id" value="{{ comment.id }}">
+                                <button class="remove-default-btn dislike-btn{{comment.id}}" type="submit">
+                                    <i class="far fa-thumbs-down dislike-icon{{comment.id}} btn-success" style="color: white;"> <span class="dislike_count{{comment.id}}">{{ comment.dislikes.all.count }}</span></i>
+                                </button>
+                            {% else %}
+                                <input type="hidden" name="comment_id" value="{{ comment.id }}">
+                                <button class="remove-default-btn dislike-btn{{comment.id}}" type="submit">
+                                    <i class="far fa-thumbs-down dislike-icon{{comment.id}}" style="color: white;"> <span class="dislike_count{{comment.id}}">{{ comment.dislikes.all.count }}</span></i>
+                                </button>
+                            {% endif %}
+                        </form>
+
+
+
+
+
+
+
+
+
+                             <form method="POST" action="{% url 'comment-like' post.pk comment.pk %}">
+                                {% csrf_token %}
+                                {% if user in comment.likes.all %}
+                                    <input type="hidden" name="next" value="{{ request.path }}">
+                                    <button class="remove-default-btn" type="submit">
+                                        <i class="far fa-thumbs-up" style="color: green;"> <span>{{ comment.likes.all.count }}</span></i>
+                                    </button>
+                                {% else %}
+                                    <input type="hidden" name="next" value="{{ request.path }}">
+                                    <button class="remove-default-btn" type="submit">
+                                        <i class="far fa-thumbs-up" style="color: white;"> <span>{{ comment.likes.all.count }}</span></i>
+                                    </button>
+                                {% endif %}
+                            </form>
+                            <form method="POST" action="{% url 'comment-dislike' post.pk comment.pk %}">
+                                {% csrf_token %}
+                                {% if user in comment.dislikes.all %}
+                                    <input type="hidden" name="next" value="{{ request.path }}">
+                                    <button class="remove-default-btn" type="submit">
+                                        <i class="far fa-thumbs-down" style="color: green;"> <span>{{ comment.dislikes.all.count }}</span></i>
+                                    </button>
+                                {% else %}
+                                    <input type="hidden" name="next" value="{{ request.path }}">
+                                    <button class="remove-default-btn" type="submit">
+                                        <i class="far fa-thumbs-down" style="color: white;"> <span>{{ comment.dislikes.all.count }}</span></i>
+                                    </button>
+                                {% endif %}
+                            </form>
+<!-- <script type="text/javascript">
+    $(document).on('submit', '.reply-form', function(event){
+        event.preventDefault();
+        console.log($(this).serialize());
+        $.ajax({
+            type: 'POST',
+            url: $(this).attr('action'),
+            data: $(this).serialize(),
+            dataType: 'json',
+            success: function(response) {
+                $('.main-comment-section').html(response['form']);
+                $('textarea').val('');
+                // function commentReplyToggle(parent_id) {
+                //     const row = document.getElementById(parent_id);
+                //     if (row.classList.contains('d-none')) {
+                //         row.classList.remove('d-none');
+                //     } else {
+                //         row.classList.add('d-none');
+                //     }
+                //     $('textarea').val('');
+                // };
+            },
+            error: function(rs, e) {
+                console.log(rs.responseText);
+            },
+        });
+    });
+   
+</script> -->
+
+
+<!-- <div class="row justify-content-center mt-3">
+    <div class="col-md-5 col-sm-12">
+        { if comments.has_next %}
+            <a class="infinite-more-link" href="?page={{ comments.next_page_number }}"></a>
+        { endif %}
+    </div>
+</div>
+{ if comments.has_next %}
+<div class="d-flex justify-content-center" style="display:none;">
+    <div class="spinner-border" role="status">
+        <span class="sr-only">Loading...</span>
+    </div>
+</div>
+{ else %}
+{ endif %} -->
+
+
+
+ // $(document).ready(function(){
+    //      //like ajax call
+    //     $('.like-form').submit(function(e){
+    //         e.preventDefault();
+    //         // const post_id=$(`.like-btn${post_id}`).val();
+    //         // const post_id=$('.like-btn').val();
+
+    //         const post_id=$(this).attr('id')
+    //         const likeText = $(`.like-btn${post_id}`).text()
+    //         const trim = $.trim(likeText)
+    //         const url=$(this).attr('action') 
+    //         let res;
+    //         const like = $(`.like_count${post_id}`).text()
+    //         // const trimCount = parseInt(like)
+    //         // const token=$('input[name=csrfmiddlewaretoken]').val();
+    //         $.ajax({
+    //             method:"POST",
+    //             url:url,
+    //             // headers:{'X-CSRFToken': token},
+    //             data:{
+    //                 'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val(),
+    //                 'post_id':post_id,
+    //             },
+    //             success:function(response){
+    //                 if(response.liked===true){
+    //                     $(`.like-icon${post_id}`).addClass('btn-success')
+    //                 }else{
+    //                     $(`.like-icon${post_id}`).removeClass('btn-success')
+    //                 }
+    //                 if(response.disliked===true){
+    //                     $(`.dislike-icon${post_id}`).addClass("btn-success")
+    //                 }else{
+    //                     $(`.dislike-icon${post_id}`).removeClass("btn-success")
+    //                 }
+    //                 likes=$(`.like_count${post_id}`).text(response.likes_count)
+    //                 parseInt(likes)
+    //                 dislikes=$(`.dislike_count${post_id}`).text(response.dislikes_count)
+    //                 parseInt(dislikes)
+    //             },
+    //             error:function(response){
+    //                 console.log("Failed ", response)
+    //             }
+    //         })
+    //     });
+
+
+    //     //dislike ajax call
+
+    //     $('.dislike-form').submit(function(e){
+    //         e.preventDefault();
+    //         // const post_id=$(".dislike-btn").val();
+    //         // const token=$('input[name=csrfmiddlewaretoken]').val();
+    //         const post_id = $(this).attr('id')
+    //         const dislikeText = $(`.dislike-btn${post_id}`).text()
+    //         const trim = $.trim(dislikeText)
+    //         const url =$(this).attr('action') 
+    //         let res;
+    //         const dislike = $(`.dislike_count${post_id}`).text()
+    //         // const trimCount = parseInt(dislike)
+    //         $.ajax({
+    //             method:"POST",
+    //             url:url,
+    //             // headers:{"X-CSRFToken": token},
+    //             data:{
+    //                 'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val(),
+    //                 'post_id':post_id,
+    //             },
+    //             success:function(response){
+    //                 if(response.disliked===true){
+    //                   $(`.dislike-icon${post_id}`).addClass("btn-success")
+    //                 }else{
+    //                   $(`.dislike-icon${post_id}`).removeClass("btn-success")
+    //                 }
+
+    //                 if(response.liked===true){
+    //                   $(`.like-icon${post_id}`).addClass('btn-success')
+    //                 }else{
+    //                   $(`.like-icon${post_id}`).removeClass('btn-success')
+    //                 }
+    //                 likes=$(`.like_count${post_id}`).text(response.likes_count)
+    //                 parseInt(likes)
+    //                 dislikes=$(`.dislike_count${post_id}`).text(response.dislikes_count)
+    //                 parseInt(dislikes)
+    //             },
+    //             error:function(response){
+    //                 console.log('failed', response)
+    //             }
+    //         }) 
+    //     });
+
+    // });
+
+
+  <div class="row justify-content-center mt-3 mb-5">
+        <div class="col-md-5 col-sm-12">
+            <form method="POST">
+                {% csrf_token %}
+                {{ form | crispy }}
+                <div class="d-grid gap-2">
+                    <button class="btn btn-success mt-3">Submit!</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {{comment_count}}
+    <div class="infinite-container">
+        {% for comment in comments %}
+            <div class="infinite-item comments-container">
+                {% if comment.is_parent %} 
+                    <div class="row justify-content-center mt-3">
+                    {% if comment.children %}
+                        <div class="col-md-5 col-sm-12">
+                    {% else %}
+                        <div class="col-md-5 col-sm-12 border-bottom">
+                    {% endif %}
+                            <p>
+                                <div>
+                                    <a href="{% url 'show_profile_page' comment.author.profile.pk %}">
+                                        <img class="round-circle post-img" height="45" width="45" src="{{ comment.author.profile.picture.url }}" />
+                                    </a>
+                                    <p class="post-text">
+                                        <a class="text-primary post-link" href="{% url 'show_profile_page' comment.author.profile.pk %}">@{{ comment.author }}</a> {{ comment.created_on }}
+                                    </p>
+                                </div>
+                                {% if request.user == comment.author %}
+                                    <a href="{% url 'comment-delete' post.pk comment.pk %}" class="edit-color"><i class="fas fa-trash"></i></a>
+                                {% endif %}
+                            </p>
+                            <p>{{ comment.comment }}</p>
+                            <div class="d-flex flex-row">
+                                <form method="POST" action="{% url 'comment-like' post.pk comment.pk %}">
+                                    {% csrf_token %}
+                                    {% if user in comment.likes.all %}
+                                        <input type="hidden" name="next" value="{{ request.path }}">
+                                        <button class="remove-default-btn" type="submit">
+                                            <i class="far fa-thumbs-up" style="color: green;"> <span>{{ comment.likes.all.count }}</span></i>
+                                        </button>
+                                    {% else %}
+                                        <input type="hidden" name="next" value="{{ request.path }}">
+                                        <button class="remove-default-btn" type="submit">
+                                            <i class="far fa-thumbs-up" style="color: white;"> <span>{{ comment.likes.all.count }}</span></i>
+                                        </button>
+                                    {% endif %}
+                                </form>
+                                <form method="POST" action="{% url 'comment-dislike' post.pk comment.pk %}">
+                                    {% csrf_token %}
+                                    {% if user in comment.dislikes.all %}
+                                        <input type="hidden" name="next" value="{{ request.path }}">
+                                        <button class="remove-default-btn" type="submit">
+                                            <i class="far fa-thumbs-down" style="color: green;"> <span>{{ comment.dislikes.all.count }}</span></i>
+                                        </button>
+                                    {% else %}
+                                        <input type="hidden" name="next" value="{{ request.path }}">
+                                        <button class="remove-default-btn" type="submit">
+                                            <i class="far fa-thumbs-down" style="color: white;"> <span>{{ comment.dislikes.all.count }}</span></i>
+                                        </button>
+                                    {% endif %}
+                                </form>
+                                <div>
+                                  <!--   {% if comment.children %}
+                                        <button class="remove-default-btn" style="color: white">Replies {{comment.children.all.count}}</button>
+                                    {% endif %} -->
+                                    {% if comment.children %}
+                                        <a href="{% url 'view-comment-reply' comment.pk %}"><button class="remove-default-btn" style="color: white">Replies: {{comment.children.all.count}}</button></a>
+                                    {% else %}
+                                        <p>Replies: 0</p>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <button class="remove-default-btn"><i class="far fa-comment-dots" style="color: white" onclick="commentReplyToggle('{{ comment.pk }}')"></i></button>
+                                </div>
+                            </div>
+                        </div> 
+                        <div class="row justify-content-center mt-3 mb-5 d-none" id="{{ comment.pk }}">
+                            <div class="col-md-5 col-sm-12">
+                                <form method="POST" action="{% url 'comment-reply' post.pk comment.pk %}">
+                                    {% csrf_token %}
+                                    {{ form | crispy }}
+                                    <div class="d-grid gap-2">
+                                        <button class="btn btn-success mt-3">Submit!</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        {% if comment.children.0 %}
+                            <div class="row justify-content-center mt-3 child-comment">
+                                <div class="col-md-5 col-sm-12">
+                                    <p>
+                                        <div>
+                                            <a href="{% url 'show_profile_page' comment.children.0.author.profile.pk %}">
+                                                <img class="round-circle post-img" height="30" width="30" src="{{ comment.children.0.author.profile.picture.url }}" />
+                                            </a>
+                                            <p class="post-text">
+                                                <a class="text-primary post-link" href="{% url 'show_profile_page' comment.children.0.author.profile.pk %}">@{{ comment.children.0.author }}</a> {{ comment.children.0.created_on }}
+                                            </p>
+                                        </div>
+                                        {% if request.user == comment.children.0.author %}
+                                            <a href="{% url 'comment-delete' post.pk comment.children.0.pk %}" class="edit-color"><i class="fas fa-trash"></i></a>
+                                        {% endif %}
+                                    </p>
+                                    <p>{{ comment.children.0.comment }}</p>
+                                </div>
+                            </div>
+                        {% endif %}
+                        {% if comment.children.1 %}
+                            <div class="row justify-content-center mt-3 child-comment">
+                                <div class="col-md-5 col-sm-12">
+                                    <p>
+                                        <div>
+                                            <a href="{% url 'show_profile_page' comment.children.1.author.profile.pk %}">
+                                                <img class="round-circle post-img" height="30" width="30" src="{{ comment.children.1.author.profile.picture.url }}" />
+                                            </a>
+                                            <p class="post-text">
+                                                <a class="text-primary post-link" href="{% url 'show_profile_page' comment.children.1.author.profile.pk %}">@{{ comment.children.1.author }}</a> {{ comment.children.1.created_on }}
+                                            </p>
+                                        </div>
+                                        {% if request.user == comment.children.1.author %}
+                                            <a href="{% url 'comment-delete' post.pk comment.children.1.pk %}" class="edit-color"><i class="fas fa-trash"></i></a>
+                                        {% endif %}
+                                    </p>
+                                    <p>{{ comment.children.1.comment }}</p>
+                                </div>
+                            </div>
+                        {% endif %}
+                        {% if comment.children.2 %}
+                            <div class="row justify-content-center mt-3 child-comment">
+                                <div class="col-md-5 col-sm-12">
+                                    <p>
+                                        <div>
+                                            <a href="{% url 'show_profile_page' comment.children.2.author.profile.pk %}">
+                                                <img class="round-circle post-img" height="30" width="30" src="{{ comment.children.2.author.profile.picture.url }}" />
+                                            </a>
+                                            <p class="post-text">
+                                                <a class="text-primary post-link" href="{% url 'show_profile_page' comment.children.2.author.profile.pk %}">@{{ comment.children.2.author }}</a> {{ comment.children.2.created_on }}
+                                            </p>
+                                        </div>
+                                        {% if request.user == comment.children.2.author %}
+                                            <a href="{% url 'comment-delete' post.pk comment.children.2.pk %}" class="edit-color"><i class="fas fa-trash"></i></a>
+                                        {% endif %}
+                                    </p>
+                                    <p>{{ comment.children.2.comment }}</p>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div> 
+                    {% if comment.children %}
+                        <div class="row justify-content-center mt-3"><div class="col-md-5 col-sm-12 border-bottom"></div></div>
+                    {% endif %}  
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+    <div class="row justify-content-center mt-3">
+        <div class="col-md-5 col-sm-12">
+            {% if comments.has_next %}
+                <a class="infinite-more-link" href="?page={{ comments.next_page_number }}"></a>
+            {% endif %}
+        </div>
+    </div>
+    {% if comments.has_next %}
+    <div class="d-flex justify-content-center" style="display:none;">
+        <div class="spinner-border" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+    {% else %}
+    {% endif %}
+</div>
+
+
+   <div class="d-flex flex-row">
+                <form method="POST" action="{% url 'post-detail-like' post.id %}" class="like-form" id="{{post.id}}">
+                    {% csrf_token %}
+                    {% if user not in post.likes.all %}
+                        <input type="hidden"  name="post_id" value="{{ post.id }}">
+                        <button class="remove-default-btn like-btn{{post.id}}" type="submit">
+                            <i class="far fa-thumbs-up like-icon{{post.id}}"  style="color: white"><span class="like_count{{post.id}}">{{ post.likes.all.count }}</span></i>
+                        </button>
+                    {% else %}
+                        <input type="hidden" name="post_id" value="{{ post.id }}">
+                        <button class="remove-default-btn like-btn{{post.id}}" type="submit">
+                            <i class="far fa-thumbs-up like-icon{{post.id}} btn-success"  style="color: white"><span class="like_count{{post.id}}">{{ post.likes.all.count }}</span></i>
+                        </button>
+                    {% endif %}
+                </form>
+                
+                <form method="POST" action="{% url 'post-detail-dislike' post.id %}" class="dislike-form" id='{{post.id}}'>
+                    {% csrf_token %}
+                    {% if user not in post.dislikes.all %}
+                        <input type="hidden" name="post_id" value="{{ post.id }}">
+                        <button class="remove-default-btn dislike-btn{{post.id}}" type="submit" >
+                            <i class="far fa-thumbs-down dislike-icon{{post.id}}"  style="color: white"> <span class="dislike_count{{post.id}}">{{ post.dislikes.all.count }}</span></i>
+                        </button>
+                    {% else %}
+                        <input type="hidden" name="post_id" value="{{ post.id }}">
+                        <button class="remove-default-btn dislike-btn{{post.id}}" type="submit" >
+                            <i class="far fa-thumbs-down dislike-icon{{post.id}} btn-success"  style="color: white"> <span class="dislike_count{{post.id}}">{{ post.dislikes.all.count }}</span></i>
+                        </button>
+                    {% endif %}
+                </form>
+
+            </div>
+
+
+
+
+
+
+
+   <div class="d-flex flex-row">
+                <form method="POST" action="{% url 'like' post.pk %}">
+                    {% csrf_token %}
+                    {% if user not in post.likes.all %}
+                        <input type="hidden" name="next" value="{{ request.path }}">
+                        <button class="remove-default-btn" type="submit">
+                            <i class="far fa-thumbs-up" style="color: white"><span>{{ post.likes.all.count }}</span></i>
+                        </button>
+                    {% else %}
+                        <input type="hidden" name="next" value="{{ request.path }}">
+                        <button class="remove-default-btn" type="submit">
+                            <i class="far fa-thumbs-up" style="color: green"><span>{{ post.likes.all.count }}</span></i>
+                        </button>
+                    {% endif %}
+                </form>
+                <form method="POST" action="{% url 'dislike' post.pk %}">
+                    {% csrf_token %}
+                    {% if user not in post.dislikes.all %}
+                        <input type="hidden" name="next" value="{{ request.path }}">
+                        <button class="remove-default-btn" type="submit">
+                            <i class="far fa-thumbs-down" style="color: white"> <span>{{ post.dislikes.all.count }}</span></i>
+                        </button>
+                    {% else %}
+                        <input type="hidden" name="next" value="{{ request.path }}">
+                        <button class="remove-default-btn" type="submit">
+                            <i class="far fa-thumbs-down" style="color: green"> <span>{{ post.dislikes.all.count }}</span></i>
+                        </button>
+                    {% endif %}
+                </form>
+            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   <!--  <div class="row justify-content-center mt-3 mb-5"><div class="col-md-5 col-sm-12"> 
+        <h4>{{comment_count}} {{comment.children.all.count}}</h4>
+    </div></div> -->
+    <!-- <div class="">
+        <div class="blogBox"><h1>1</h1></div>
+        <div class="blogBox moreBox"><h1>2</h1></div>
+        <div class="blogBox moreBox"><h1>3</h1></div>
+        <div style="display: none;" class="blogBox moreBox"><h1>4</h1></div>
+        <div style="display: none;" class="blogBox moreBox"><h1>5</h1></div>
+        <div style="display: none;" class="blogBox moreBox"><h1>6</h1></div>
+        <div style="display: none;" class="blogBox moreBox"><h1>7</h1></div>
+        <div style="display: none;" class="blogBox moreBox"><h1>8</h1></div>
+        <div style="display: none;" class="blogBox moreBox"><h1>9</h1></div>
+    </div>
+    <div id="loadMore" style="">
+        <a href="#">Load More</a>
+    </div> -->
+    <!-- <button class="fadebutton">Click to fade</button> -->
+    <!-- <div class="ex"><h1>Hi</h1></div> -->
+    <!-- <div class="infinite-container ex"> -->
+
+
+
+
+           
+                           <!--  <div id="loadMore" class="loadMore" style="">
+                                <a href="#">Load More</a>
+                            </div> -->
+                        <!-- </div> -->
+
+
+                     <!--    <div id="spinner-box" class=" spinner-box not-visible">
+                            <div class="spinner-border text-primary" role="status"></div>
+                        </div>
+                        <div id="loading-box" class="loading-box">
+                            <button class="btn btn-primary" id="load-btn" class="load-btn">Load more</button>
+                        </div> -->
+
+
+                       <!--  <div id="replies-box"></div>
+                        <div id="spinner-box" class="not-visible"><div class="spinner-border text-primary" role="status"></div></div>
+                        <div id="loading-box"><button class="btn btn-primary" id="load-btn">Load More</button></div> -->
+
+
+
+
+
+  <!--   {% if comment.children %}
+                                        <a href="{% url 'comment-reply' comment.pk %}"><button class="remove-default-btn" style="color: white">Replies {{comment.children.all.count}}</button></a>
+                                    {% endif %} -->
+
+<button class="remove-default-btn"><i class="far fa-comment-dots" style="color: white" onclick="commentReplyToggle('{{ comment.pk }}')"></i></button>
+ <div class="row justify-content-center mt-3 mb-5 d-none" id="{{ comment.pk }}">
+                            <div class="col-md-5 col-sm-12">
+                                <form method="POST" action="{% url 'comment-reply' post.pk comment.pk %}">
+                                    {% csrf_token %}
+                                    {{ form | crispy }}
+                                    <div class="d-grid gap-2">
+                                        <button class="btn btn-success mt-3">Submit!</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <!-- <button class="viewreplies" style="color: white">Replies: {{ comment.children.all.count }}</button> -->
+                        <!-- <div class="moreBox blogBox" id="replies-box" class="replies-box"> -->
+                        {% for child_comment in comment.children %}
+                            
+                            <div class="row justify-content-center child-comment">
+                                <div class="col-md-5 col-sm-12">
+                                    <div>
+                                        <a href="{% url 'show_profile_page' child_comment.author.profile.pk %}">
+                                            <img class="round-circle post-img" height="30" width="30" src="{{ child_comment.author.profile.picture.url }}" />
+                                        </a>
+                                        <p class="post-text">
+                                            <a class="text-primary post-link" href="{% url 'show_profile_page' child_comment.author.profile.pk %}">@{{ child_comment.author }}</a> replied on {{ child_comment.created_on }}
+                                        </p>
+                                    </div>
+                                    {% if request.user == child_comment.author %}
+                                        <a href="{% url 'comment-delete' post.pk child_comment.pk %}" class="edit-color"><i class="fas fa-trash"></i></a>
+                                    {% endif %}
+                                    
+                                    <p>{{ child_comment.comment }}</p>
+                                </div>
+                            </div>
+                            
+                        {% endfor %}
+
+ 
+
+
+
+
+
+
+
+
+                            {% for child_comment in comment.children %}
+                                {% if child_comment.0 %}
+                                    <div class="row justify-content-center child-comment">
+                                        <div class="col-md-5 col-sm-12">
+                                            <div>
+                                                <a href="{% url 'show_profile_page' child_comment.author.profile.pk %}">
+                                                    <img class="round-circle post-img" height="30" width="30" src="{{ child_comment.author.profile.picture.url }}" />
+                                                </a>
+                                                <p class="post-text">
+                                                    <a class="text-primary post-link" href="{% url 'show_profile_page' child_comment.author.profile.pk %}">@{{ child_comment.author }}</a> replied on {{ child_comment.created_on }}
+                                                </p>
+                                            </div>
+                                            {% if request.user == child_comment.author %}
+                                                <a href="{% url 'comment-delete' post.pk child_comment.pk %}" class="edit-color"><i class="fas fa-trash"></i></a>
+                                            {% endif %}
+                                            
+                                            <p>{{ child_comment.comment }}</p>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+
+
+
+
+
+    
+
+
+
+  

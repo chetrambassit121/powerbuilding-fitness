@@ -1,0 +1,7 @@
+<p>Django ORM and SQL</p>
+{{users}} <Br><br><br><br>
+
+{% for i in users %}
+    <div style="padding-bottom: 10;">ID: {{ i.id }} -- <br> USERNAME: {{ i.username }} -- <br> EMAIL: {{ i.email }} -- <br> FIRST_NAME: {{ i.first_name }} -- <br> 
+        LAST_NAME: {{ i.last_name }} -- <br> CITY: {{ i.city }} -- <br> STATE: {{ i.state }}</div>
+{% endfor %}

@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Edit User Settings{% endblock %}
+{% block content %}
+
+	<div class="row mt-5">
+        <div class="col-md-5 col-sm-6">
+            <a href="{% url 'show_profile_page' object.pk %}" class="btn btn-light">Back To Profile</a>
+        </div>
+    </div>
+	<br/><br/>
+	<div class="flexbox-container">
+		<div class="flexbox-item1 login-form">
+			<h1>Edit Settings</h1>
+			<div class="form-group" id="EditProfileForm" data-branches-url="{% url 'ajax_load_citys' %}" novalidate>
+				<form method='POST'>
+					{% csrf_token %}
+					{{ form.as_p }}
+					<button class="btn btn-secondary">Update Settings</button> 
+				</form>
+			</div>
+			<h6><a href="{% url 'account_delete' request.user.pk %}">Delete Account</a></h6>
+		</div>
+	</div>
+
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+	<script>
+	    $("#id_state").change(function () {
+	      var url = $("#EditProfileForm").attr("data-branches-url");  
+	      var stateId = $(this).val();  
+
+	      $.ajax({                      
+	        url: url,                    
+	        data: {
+	          'state': stateId       
+	        },
+	        success: function (data) {  
+	          $("#id_city").html(data);  
+	        }
+	      });
+
+	    });
+  	</script>
+	
+{% endblock %}
+
+

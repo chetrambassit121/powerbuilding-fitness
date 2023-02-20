@@ -1,0 +1,252 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Profile{% endblock %}
+{% block content %}
+
+
+ <div class="row mt-5">
+    <div class="col-md-3 col-sm-6">
+      <a href="{% url 'post-list' %}" class="btn btn-light">Social Feed</a>
+    </div>
+  </div>
+  <div class="row justify-content-center mt-5">
+    <div class="col-md-8 col-sm-12 border px-5 pt-3">
+      <div class="text-center">
+        <h1 class="row justify-content-center mt-3">User Profile</h1> 
+        <h5>{{ profile }}</h5>  
+        <h6>
+          <a href="{% url 'list-followers' profile.pk %}" class="post-link">Followers: {{ number_of_followers }}</a>&nbsp;&nbsp; 
+          {% if request.user == user %}
+            <a href="{% url 'edit_profile_page' request.user.profile.pk %}">Edit Profile Page</a> &nbsp;&nbsp; 
+            <a href="{% url 'edit_profile' request.user.profile.pk %}">Edit User Settings</a>
+            <p>Date Joined: {{ user.date_joined }}</p>
+          {% endif %}
+        </h6>
+      </div>
+      <div class="text-center">
+        {% if profile.picture %}
+          <img src="{{ profile.picture.url }}" class="rounded-circle" width="100" height="100">
+        {% else %}
+          <img src="{% static 'operationfreedom/images/profile_pictures/default_pic.jpg' %}" class="rounded-circle" width="100" height="100">
+        {% endif %}
+      </div>
+      <div class="card-body">
+        <div class="text-center">
+          <h5 class="card-title">{% if profile.first_name %}{{ profile.first_name }}{% endif %} {% if profile.last_name %}{{ profile.last_name }}{% endif %} </h5>
+          <p class="small text-muted">
+            {% if profile.website_url %}
+              <a target="_blank" href="{{ profile.website_url }}">Website</a>  
+            {% endif %}
+            {% if profile.facebook_url %}
+              | <a target="_blank" href="{{ profile.facebook_url }}">Facebook</a> 
+            {% endif %}
+            {% if profile.twitter_url %} 
+              | <a target="_blank" href="{{ profile.twitter_url }}">Twitter</a> 
+            {% endif %}
+            {% if profile.instagram_url %} 
+              | <a target="_blank" href="{{ profile.instagram_url }}">Instagram</a> 
+            {% endif %}
+            {% if profile.pinterest_url %} 
+              | <a target="_blank" href="{{ profile.pinterest_url }}">Pinterest</a> 
+            {% endif %}
+            <br>
+            {% if profile.location %}
+            <p>Location: {{ profile.location }}</p>
+            {% endif %}
+            {% if profile.birth_date %}
+              <p>Birthday: {{ profile.birth_date }}</p>
+            {% endif %}
+            {% if user == request.user %}
+            {% else %}
+              {% if is_following %}
+                <form method="POST" action="{% url 'remove-follower' profile.pk %}">
+                  {% csrf_token %}
+                  <button class="btn btn-outline-danger" type="submit">Unfollow</button>
+                </form>
+              {% else %}
+                <form method="POST" action="{% url 'add-follower' profile.pk %}">
+                  {% csrf_token %}
+                  <button class="btn btn-outline-success" type="submit">Follow</button>
+                </form>
+              {% endif %}
+            {% endif %}
+          </p>  
+          <p class="card-text">{{ profile.bio }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row justify-content-center mt-3 mb-5"><div class="col-md-5 col-sm-12"><div class="flexbox-item-99"><div class="header-info2">
+    <h2>{{ user.username }} Shared Posts</h2>
+    <h4><a href="{% url 'show_profile_page' user.profile.pk %}">{{ user.username }} Posts</a></h4>
+    <h5>Click on a Post to View Comments!</h5>
+  </div></div></div></div>
+  {% for sharedpost in sharedposts %}
+  <div class="row justify-content-center mt-3">
+    <div class="col-md-5 col-sm-12 border-bottom position-relative">
+    {% if sharedpost.shared_user %}
+      <div>
+        <a href="{% url 'show_profile_page' sharedpost.shared_user.profile.pk %}">
+          <img class="round-circle post-img" height="45" width="45" src="{{ sharedpost.shared_user.profile.picture.url }}" />
+        </a>
+        <p class="post-text">   
+          <a class="text-primary post-link" href="{% url 'show_profile_page' sharedpost.shared_user.profile.pk %}">@{{ sharedpost.shared_user }}</a> shared a post on {{ sharedpost.created_on }}
+        </p>
+      </div>
+    {% endif %}
+    {% if sharedpost.shared_body %}
+      <div class="position-relative mb-3 body">
+        <p>{{ sharedpost.shared_body }}</p>
+        <a href="{% url 'post-detail' sharedpost.pk %}" class="stretched-link"></a>
+      </div>
+      <div class="shared-post">
+        <a href="{% url 'show_profile_page' sharedpost.author.profile.pk %}">
+          <img class="round-circle post-img" height="45" width="45" src="{{ sharedpost.author.profile.picture.url }}" />
+        </a>
+        <p class="post-text">
+          <a class="text-primary post-link" href="{% url 'show_profile_page' sharedpost.author.profile.pk %}">@{{ sharedpost.author }}</a> {{ sharedpost.shared_on }}
+        </p>
+      </div>
+    {% endif %}
+    <div class="shared-post position-relative pt-3">
+      <div class="position-relative">
+        <div class="body">
+          <p>{{ sharedpost.body }}</p>
+        </div>
+        {% if sharedpost.image %}
+          <img src="{{ sharedpost.image.url }}" class="post-image"/>
+        {% endif %}
+        <a href="{% url 'post-detail' sharedpost.pk %}" class="stretched-link"></a>
+      </div>
+    </div>
+    <div class="d-flex flex-row">
+      <form method="POST" action="{% url 'shared-profile-like' profile.pk sharedpost.id   %}" class="like-form" id="{{sharedpost.id}}">
+        {% csrf_token %}
+        {% if request.user not in sharedpost.likes.all %}
+          <input type="hidden"  name="post_id" value="{{ sharedpost.id }}">
+          <button class="remove-default-btn like-btn{{sharedpost.id}}" type="submit">
+              <i class="far fa-thumbs-up like-icon{{sharedpost.id}}"  ><span class="like_count{{sharedpost.id}}">{{ sharedpost.likes.all.count }}</span></i>
+          </button>
+        {% else %}
+          <input type="hidden" name="post_id" value="{{ sharedpost.id }}">
+          <button class="remove-default-btn like-btn{{sharedpost.id}}" type="submit">
+              <i class="far fa-thumbs-up like-icon{{sharedpost.id}} btn-success"  ><span class="like_count{{sharedpost.id}}">{{ sharedpost.likes.all.count }}</span></i>
+          </button>
+        {% endif %}
+      </form>
+      <form method="POST" action="{% url 'shared-profile-dislike' profile.pk sharedpost.id  %}" class="dislike-form" id='{{sharedpost.id}}'>
+        {% csrf_token %}
+        {% if request.user not in sharedpost.dislikes.all %}
+          <input type="hidden" name="post_id" value="{{ sharedpost.id }}">
+          <button class="remove-default-btn dislike-btn{{sharedpost.id}}" type="submit" >
+              <i class="far fa-thumbs-down dislike-icon{{sharedpost.id}}"  > <span class="dislike_count{{sharedpost.id}}">{{ sharedpost.dislikes.all.count }}</span></i>
+          </button>
+        {% else %}
+          <input type="hidden" name="post_id" value="{{ sharedpost.id }}">
+          <button class="remove-default-btn dislike-btn{{sharedpost.id}}" type="submit" >
+              <i class="far fa-thumbs-down dislike-icon{{sharedpost.id}} btn-success"  > <span class="dislike_count{{sharedpost.id}}">{{ sharedpost.dislikes.all.count }}</span></i>
+          </button>
+        {% endif %}
+      </form>
+      <p>Comments: {{ comment.count }}</p>
+    </div>
+    </div>
+  </div>
+{% endfor %}
+<div class="row justify-content-center mt-3">
+  <div class="col-md-5 col-sm-12 position-relative">
+    {% if sharedposts.has_previous %}
+      <a href="?page=1">&laquo First</a>
+      <a href="?page={{ sharedposts.previous_page_number }}">Previous</a>
+    {% endif %}
+    Page {{ sharedposts.number }} of {{ sharedposts.paginator.num_pages }}
+    {% if sharedposts.has_next %}
+      <a href="?page={{ sharedposts.next_page_number }}">Next</a>
+      <a href="?page={{ sharedposts.paginator.num_pages }}">Last &raquo</a>
+    {% endif %}
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script type="text/javascript">
+  $(document).ready(function(){
+    $('.like-form').submit(function(e){
+      e.preventDefault();
+      const post_id=$(this).attr('id')
+      const likeText = $(`.like-btn${post_id}`).text()
+      const trim = $.trim(likeText)
+      const url=$(this).attr('action') 
+      let res;
+      const like = $(`.like_count${post_id}`).text()
+      $.ajax({
+        method:"POST",
+        url:url,
+        data:{
+          'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val(),
+          'post_id':post_id,
+        },
+        success:function(response){
+          if(response.liked===true){
+            $(`.like-icon${post_id}`).addClass('btn-success')
+          }else{
+            $(`.like-icon${post_id}`).removeClass('btn-success')
+          }
+          if(response.disliked===true){
+            $(`.dislike-icon${post_id}`).addClass("btn-success")
+          }else{
+            $(`.dislike-icon${post_id}`).removeClass("btn-success")
+          }
+          likes=$(`.like_count${post_id}`).text(response.likes_count)
+          parseInt(likes)
+          dislikes=$(`.dislike_count${post_id}`).text(response.dislikes_count)
+          parseInt(dislikes)
+        },
+        error:function(response){
+          console.log("Failed ", response)
+        }
+      })
+    });
+
+    $('.dislike-form').submit(function(e){
+      e.preventDefault();
+      const token=$('input[name=csrfmiddlewaretoken]').val();
+      const post_id = $(this).attr('id')
+      const dislikeText = $(`.dislike-btn${post_id}`).text()
+      const trim = $.trim(dislikeText)
+      const url =$(this).attr('action') 
+      let res;
+      const dislike = $(`.dislike_count${post_id}`).text()
+      const trimCount = parseInt(dislike)
+      $.ajax({
+        method:"POST",
+        url:url,
+        data:{
+          'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val(),
+          'post_id':post_id,
+        },
+        success:function(response){
+          if(response.disliked===true){
+            $(`.dislike-icon${post_id}`).addClass("btn-success")
+          }else{
+            $(`.dislike-icon${post_id}`).removeClass("btn-success")
+          }
+          if(response.liked===true){
+            $(`.like-icon${post_id}`).addClass('btn-success')
+          }else{
+            $(`.like-icon${post_id}`).removeClass('btn-success')
+          }
+          likes=$(`.like_count${post_id}`).text(response.likes_count)
+          parseInt(likes)
+          dislikes=$(`.dislike_count${post_id}`).text(response.dislikes_count)
+          parseInt(dislikes)
+        },
+        error:function(response){
+          console.log('failed', response)
+        }
+      }) 
+    });
+
+  });
+</script>
+
+{% endblock %}

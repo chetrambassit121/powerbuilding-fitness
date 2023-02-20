@@ -1,0 +1,117 @@
+following https://www.youtube.com/watch?v=7smmziNxiHE&list=PLEsfXFp6DpzTOcOVdZF-th7BS_GYGguAS&index=1
+downloaded this code from https://github.com/codingforentrepreneurs/Advancing-the-Blog
+
+
+
+SETTING UP:
+deleted the old virt folder, and created a new one, pip install -r requirements.txt, deleted existing databases, deleted all migrations ... then do python manage.py makemigrations and migrate ..starting fresh 
+
+
+
+OBJECTIVE:
+we basically want to convert the regular django urls, views, forms FROM apps like post and comments ...  into drf api logic ... so we will use drf coding for this  
+
+
+
+POSTS APP SETUP 
+1. create a folder called api in posts folder             # we will store our api files in this folder 
+2. create __init__.py and views.py                        # posts/api needs an init .. api logic will have its own views seperate from the post/views
+3. urls.py, 						                      # api views will have its own urls .. include api urls into the main urls file in blog/urls
+4. serializers.py,                                        # this basically is like our forms.py files but called serializers for api logic ...
+														    import the serializer into api/views.py as well ... 
+5. permissions.py                                         # this file is for user permission logic 
+6. pagination.py                                          # this file is for pagination logic 
+
+
+POWERSHELL COMMANDS START AND IMPORTS FOR POST 
+1. python manage.py shell 
+> from posts.models import Post
+> from posts.api.serializers import PostListSerializer 
+
+GETTING AND DISPLAYING POST DATA 
+> obj = Post.objects.first()                              # CV = the first object in Post  
+> print(obj)                                              # will print the varible obj which is the first object in Post
+> obj                                                     # will display title of first post (displays the field in __str__ from posts/
+                                                            models.py in our case is title) 
+> obj.id                                                  # will display id of first post 
+
+SERIALZING POST DATA IN POWERSHELL
+> obj_data = PostListSerializer(obj)                          # CV = PostSerrilzer class accessing data from obj variable  
+> obj_data.data                                           # serialzed data will be displayed 
+example of serlized data:
+{'id': 2, 'title': 'another tiem here', 'slug': 'another-tiem-here', 'content': 'content 2', 'publish': '2022-01-01'}
+> obj_data.data['content']								  # from the serilzed data get the content field .. will de displayed 
+
+INSERTING DATA IN POWERSHELL 
+														  # copy and paste the following code into powershell then click enter 
+>
+data = {                                                  
+	'title': 'Yeahh Buddy',
+	'content': 'New Content',
+	'publish': '2022-5-8',
+	'slug': 'yeah-buddy',
+}
+														  # CV data = {fields}  
+> new_item = PostListSerializer(data=data)                    # CV = PostS accessing variable data 
+> new_item.initial_data                                   # will display the fields from data variable .. must include initial_ with data variable 
+{'title': 'Yes Buddy', 'content': 'New Content', 'publish': '2022-5-8'}
+
+# CREATING LOGIC WITH INSERTING DATA THRU POWERSHELL
+														  # copy past code into shell the click enter 
+>
+new_item = PostListSerializer(data=data)
+if new_item.is_valid():
+	new_item.save()
+else:
+	print(new_item.errors)
+														  # CV new_item = PostS is accessing data variable
+														  # if new_item varible valid 
+														  # save 
+														  # else 
+														  # prints error
+														  # this code will print title of data variable or give an error 
+> new_item.data                                           # displays in serialzed data form ..  from data variable  
+{'id': 3, 'title': 'Yeahh Buddy', 'slug': 'yeah-buddy', 'content': 'New Content', 'publish': '2022-05-08'}
+
+
+
+
+UPDATE IN POWERSHELL 
+														# copy n paste the following update coding
+from posts.models import Post
+from posts.api.serializers import PostDetailSerializer  
+data = {                                                  
+	'title': 'Yeahh Buddy',
+	'content': 'New Content',
+	'publish': '2022-5-8',
+	'slug': 'yeah-buddy',
+}
+obj = Post.objects.get(id=1)
+new_item = PostDetailSerializer(obj, data=data)
+if new_item.is_valid():
+	new_item.save()
+else:
+	print(new_item.errors)  
+													  #
+
+> new_item.data                                       # fields/data from data varible will be displayed .. we updated post id=1 w/ varible data
+{'id': 1, 'title': 'Yeahh Buddy', 'slug': 'yeah-buddy', 'content': 'New Content', 'publish': '2022-05-08'}
+
+NOTES for the above coding
+data = {fields}                                       # CV data = to the fields/data we created
+obj = Post.objects.get(id=1)                          # CV obj = accessing the post with an id=1 
+new_item = PostDetailSerializer(obj, data=data)       # CV new_item = using PostDetailS on the obj and data variables 
+
+# by inserting this coding into powershell .. we are getting the post with an id=1, then updating that post with the information in the data variable
+
+
+
+
+DELETE IN POWERSHELL
+> obj = Post.objects.get(id=1)
+> obj.delete()
+(1, {'posts.Post': 1})
+
+
+
+														

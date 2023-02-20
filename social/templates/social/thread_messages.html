@@ -1,0 +1,67 @@
+{% load crispy_forms_tags %}
+{% load static %}
+
+
+	<div class="row">
+		<div class="col-md-12 mt-5 p-3 shadow">
+			{% if thread.receiver == request.user %}
+				<img class="round-circle post-img message-user-img" height="45" width="45" src="{{ thread.user.profile.picture.url }}" />
+				<h5>@{{ thread.user }}</h5>
+			{% else %}
+				<img class="round-circle post-img" height="45" width="45" src="{{ thread.receiver.profile.picture.url }}" />
+				<h5>@{{ thread.receiver }}</h5>
+			{% endif %}
+		</div>
+		<div class="row justify-content-center mt-3 mb-5">
+        <div class="col-md-5 col-sm-12">
+			<form method="POST" class="thread-form" action="{% url 'create-message' thread.pk %}" enctype="multipart/form-data">
+				{% csrf_token %}
+				{{ form | crispy }}
+				<div class="d-grid gap-2">
+                    <button class="btn btn-success mt-3">Submit</button>
+                </div>
+			</form>
+		</div>
+	</div>
+	</div>
+
+	{% if message_list.all.count == 0 %}
+	<div class="row my-5">
+		<div class="col-md-12">
+			<p class="empty-text">No Messages</p>
+		</div>
+	</div>
+	{% endif %}
+
+
+	<div class="infinite-container thread-list">
+		{% for message in message_list %}
+		<div class="row infinite-item">
+			{% if message.sender_user == request.user %}
+				<div class="col-md-12 offset-6">
+					{% if message.image %}
+					<div class="message-receiver-container ms-auto">
+						<img src="{{ message.image.url }}" class="message-image" />
+					</div>
+					{% endif %}
+					<div class="received-message my-3" style="background-color: blue;">
+						<p>{{ message.body }}</p>
+						<p class="message-date">{{ message.date }}<p>
+					</div>
+				</div>	
+			{% elif message.receiver_user == request.user %}
+				<div class="col-md-12 my-1" >
+					{% if message.image %}
+					<div>
+						<img src="{{ message.image.url }}" class="message-image" />
+					</div>
+					{% endif %}
+					<div class="sent-message my-3" style="background-color: gray;">
+						<p>{{ message.body }}</p>
+						<p class="message-date">{{ message.date }}</p>
+					</div>
+				</div>
+			{% endif %}
+		</div>
+		{% endfor %}
+	</div>

@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+
+	<div class="thread-list">
+		{% include 'social/thread_messages.html' %}		
+	</div>
+	<div class="row justify-content-center mt-3 mb-5">
+        <div class="col-md-5 col-sm-12">
+            {% if message_list.has_next %}
+                <a class="infinite-more-link" href="?page={{ message_list.next_page_number }}"></a>
+            {% endif %}
+        </div>
+    </div>
+    {% if message_list %}
+	    <div class="d-flex justify-content-center" style="display:none;">
+	        <div class="spinner-border" role="status">
+	            <span class="sr-only">Loading...</span>
+	        </div>
+	    </div>
+    {% else %}
+    	
+    {% endif %}
+
+	
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript">
+        $(document).on('submit', '.thread-form', function(event){
+            event.preventDefault();
+            console.log($(this).serialize());
+            $.ajax({
+                type: 'POST',
+                url: $(this).attr('action'),
+                data: $(this).serialize(),
+                dataType: 'json',
+                success: function(response) {
+                    $('.thread-list').html(response['form']);
+                    $('textarea').val('');
+                   
+                },
+                error: function(rs, e) {
+                    console.log(rs.responseText);
+                },
+            });
+        });
+    </script>
+
+{% endblock %}

@@ -1,0 +1,165 @@
+{% load crispy_forms_tags %}
+{% load static %}
+
+<div class="row justify-content-center mt-3 mb-5">
+    <div class="col-md-5 col-sm-12 border-bottom">
+        <form method="POST" id="" class="post-form" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form | crispy }}
+            {{ video_form | crispy }}
+            <div class="d-grid gap-2">
+                <button class="btn btn-success mt-3">Submit!</button>
+            </div>
+        </form>
+       <!--  <form method="POST" id="" class="post-form" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <input type="text" name="name" id="inputName">
+            <input type="file" name="image" id="inputFile">
+            {{ video_form | crispy }}
+            <div class="d-grid gap-2">
+                <button class="btn btn-success mt-3">Submit!</button>
+            </div>
+        </form> -->
+      <!--   <form  method="POST" action='.' id="ajax" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="text" name="name" id="inputName">
+            <input type="file" name="image" id="inputFile">
+            <button id="submit"  type="submit">Add</button>
+        </form> -->
+        <h6 class="row justify-content-center">Click on a Users Post to view Comments! <br> &nbsp;&nbsp;&nbsp; View, Edit, or Delete Posts in your <a class="row justify-content-center" href="{% url 'show_profile_page' request.user.profile.pk %}">Profile</a></h6></p>
+    </div>
+</div>
+
+<div class="row justify-content-center mt-3 mb-5"><div class="col-md-5 col-sm-12"><h4 class="row justify-content-center mt-3">Total Posts: {{ post_count }}</h4></div></div>
+<div class="row justify-content-center mt-3">
+    <div class="col-md-5 col-sm-12">
+      {% if posts.has_previous %}
+        <a href="?page=1">&laquo First</a>
+        <a href="?page={{ posts.previous_page_number }}">Previous</a>
+      {% endif %}
+
+      Page {{ posts.number }} of {{ posts.paginator.num_pages }}
+
+      {% if posts.has_next %}
+        <a href="?page={{ posts.next_page_number }}">Next</a>
+        <a href="?page={{ posts.paginator.num_pages }}">Last &raquo</a>
+      {% endif %}
+    </div>
+</div>
+
+<!-- <button class="fadebutton">Click to fade</button> -->
+<div class="infinite-container ex">
+
+    {% for post in posts %}
+    <!-- <button class="fadebutton">Click to fade</button>
+    <div style="display:none" id="ex" class="ex">
+        <h1>Hey</h1>
+        <p>yo</p>
+    </div> -->
+        <div class="infinite-item">
+            <div class="row justify-content-center mt-3">
+                <div class="col-md-5 col-sm-12 border-bottom position-relative">
+                    {% if post.shared_user %}
+                        <div>
+                            <a href="{% url 'show_profile_page' post.shared_user.profile.pk %}">
+                                <img class="round-circle post-img" height="45" width="45" src="{{ post.shared_user.profile.picture.url }}"/>
+                            </a>
+                            <p class="post-text">
+                                <a class="text-primary post-link" href="{% url 'show_profile_page' post.shared_user.profile.pk %}">@{{ post.shared_user }}</a> shared a post on {{ post.created_on }}
+                            </p>
+                        </div>
+                    {% else %}
+                        <div>
+                            <a href="{% url 'show_profile_page' post.author.profile.pk %}">
+                                <img class="round-circle post-img" height="45" width="45" src="{{ post.author.profile.picture.url }}" />
+                            </a>
+                            <p class="post-text">
+                                <a class="text-primary post-link" href="{% url 'show_profile_page' post.author.profile.pk %}">@{{ post.author }}</a> {{ post.created_on }}
+                                <span onclick="shareToggle('{{ post.pk }}')"><i class="far fa-share-square share-btn"></i></span>
+                            </p>
+                        </div>
+                    {% endif %}
+                    <form method="POST" action="{% url 'share-post' post.pk %}" class="d-none" id="{{ post.pk }}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ shareform | crispy }}
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-success mt-3">share the post</button>
+                        </div>
+                    </form>
+                    {% if post.shared_body %}
+                        <div class="position-relative mb-3 body">
+                            <p>{{ post.shared_body }}</p>
+                            <!-- <a href="{ url 'post-detail' post.pk %}" class="stretched-link"></a> -->
+                        </div>
+                        
+                        <div class="shared-post">
+                            <a href="{% url 'show_profile_page' post.author.profile.pk %}">
+                                <img class="round-circle post-img" height="45" width="45" src="{{ post.author.profile.picture.url }}" />
+                            </a>
+                            <p class="post-text">
+                                <a class="text-primary post-link" href="{% url 'show_profile_page' post.author.profile.pk %}">@{{ post.author }}</a> {{ post.shared_on }}
+                            </p>
+                        </div>
+                    {% endif %}
+
+                    <div class="shared-post position-relative pt-3">
+                        <div class="position-relative ">
+                            <div class="body">
+                                <p>{{ post.body }}</p>
+                            </div>
+                            <!-- <a href="{ url 'post-detail' post.pk %}" class="stretched-link"></a> -->
+                            {% if post.image %}
+                                <div class="ajax_image">
+                                    <img src="{{ post.image.url }}" class="post-image"/>
+                                </div>
+                            {% endif %}
+                            {% if post.video %}
+                                <video class="embed-responsive embed-responsive-16by9 post-image" controls="controls" height="300" width="300">
+                                    <source src="{{post.video.url}}" type="video/mp4" />
+                                </video>
+                            {% endif %}
+                        </div>
+                    </div> 
+
+                    <div class="d-flex flex-row">
+                        <form method="POST" action="{% url 'like' post.id %}" class="like-form" id="{{post.id}}">
+                            {% csrf_token %}
+                            {% if user not in post.likes.all %}
+                                <input type="hidden"  name="post_id" value="{{ post.id }}">
+                                <button class="remove-default-btn like-btn{{post.id}}" type="submit">
+                                    <i class="far fa-thumbs-up like-icon{{post.id}}" ><span class="like_count{{post.id}}">{{ post.likes.all.count }}</span></i>
+                                </button>
+                            {% else %}
+                                <input type="hidden" name="post_id" value="{{ post.id }}">
+                                <button class="remove-default-btn like-btn{{post.id}}" type="submit">
+                                    <i class="far fa-thumbs-up like-icon{{post.id}} btn-success"><span class="like_count{{post.id}}">{{ post.likes.all.count }}</span></i>
+                                </button>
+                            {% endif %}
+                        </form>
+                        
+                        <form method="POST" action="{% url 'dislike' post.id %}" class="dislike-form" id='{{post.id}}'>
+                            {% csrf_token %}
+                            {% if user not in post.dislikes.all %}
+                                <input type="hidden" name="post_id" value="{{ post.id }}">
+                                <button class="remove-default-btn dislike-btn{{post.id}}" type="submit" >
+                                    <i class="far fa-thumbs-down dislike-icon{{post.id}}" > <span class="dislike_count{{post.id}}">{{ post.dislikes.all.count }}</span></i>
+                                </button>
+                            {% else %}
+                                <input type="hidden" name="post_id" value="{{ post.id }}">
+                                <button class="remove-default-btn dislike-btn{{post.id}}" type="submit" >
+                                    <i class="far fa-thumbs-down dislike-icon{{post.id}} btn-danger" > <span class="dislike_count{{post.id}}">{{ post.dislikes.all.count }}</span></i>
+                                </button>
+                            {% endif %}
+                        </form>
+
+                        &nbsp;&nbsp;<a href="{% url 'post-detail' post.pk %}">Comments: {{ comment.count }}</a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+

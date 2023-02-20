@@ -1,0 +1,75 @@
+{% load crispy_forms_tags %}
+{% load static %}
+
+	<div class="row justify-content-center mt-3 mb-5 d-none" id="n{{ comment.pk }}">
+        <div class="col-md-5 col-sm-12">
+            <form method="POST" class="reply-form" action="{% url 'comment-reply' post.pk comment.pk %}">
+                {% csrf_token %}
+                {{ form | crispy }}
+                <div class="d-grid gap-2">
+                    <button class="btn btn-success mt-3">Submit!</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if comment.children.0 %}
+        <div class="row justify-content-center mt-3 child-comment">
+            <div class="col-md-5 col-sm-12">
+                <p>
+                    <div>
+                        <a href="{% url 'show_profile_page' comment.children.0.author.profile.pk %}">
+                            <img class="round-circle post-img" height="30" width="30" src="{{ comment.children.0.author.profile.picture.url }}" />
+                        </a>
+                        <p class="post-text">
+                            <a class="text-primary post-link" href="{% url 'show_profile_page' comment.children.0.author.profile.pk %}">@{{ comment.children.0.author }}</a> {{ comment.children.0.created_on }}
+                        </p>
+                    </div>
+                    {% if request.user == comment.children.0.author %}
+                        <a href="{% url 'comment-delete' post.pk comment.children.0.pk %}" class="edit-color"><i class="fas fa-trash"></i></a>
+                    {% endif %}
+                </p>
+                <p>{{ comment.children.0.comment }}</p>
+            </div>
+        </div>
+    {% endif %}
+    {% if comment.children.1 %}
+        <div class="row justify-content-center mt-3 child-comment">
+            <div class="col-md-5 col-sm-12">
+                <p>
+                    <div>
+                        <a href="{% url 'show_profile_page' comment.children.1.author.profile.pk %}">
+                            <img class="round-circle post-img" height="30" width="30" src="{{ comment.children.1.author.profile.picture.url }}" />
+                        </a>
+                        <p class="post-text">
+                            <a class="text-primary post-link" href="{% url 'show_profile_page' comment.children.1.author.profile.pk %}">@{{ comment.children.1.author }}</a> {{ comment.children.1.created_on }}
+                        </p>
+                    </div>
+                    {% if request.user == comment.children.1.author %}
+                        <a href="{% url 'comment-delete' post.pk comment.children.1.pk %}" class="edit-color"><i class="fas fa-trash"></i></a>
+                    {% endif %}
+                </p>
+                <p>{{ comment.children.1.comment }}</p>
+            </div>
+        </div>
+    {% endif %}
+    {% if comment.children.2 %}
+        <div class="row justify-content-center mt-3 child-comment">
+            <div class="col-md-5 col-sm-12">
+                <p>
+                    <div>
+                        <a href="{% url 'show_profile_page' comment.children.2.author.profile.pk %}">
+                            <img class="round-circle post-img" height="30" width="30" src="{{ comment.children.2.author.profile.picture.url }}" />
+                        </a>
+                        <p class="post-text">
+                            <a class="text-primary post-link" href="{% url 'show_profile_page' comment.children.2.author.profile.pk %}">@{{ comment.children.2.author }}</a> {{ comment.children.2.created_on }}
+                        </p>
+                    </div>
+                    {% if request.user == comment.children.2.author %}
+                        <a href="{% url 'comment-delete' post.pk comment.children.2.pk %}" class="edit-color"><i class="fas fa-trash"></i></a>
+                    {% endif %}
+                </p>
+                <p>{{ comment.children.2.comment }}</p>
+            </div>
+        </div>
+    {% endif %}
