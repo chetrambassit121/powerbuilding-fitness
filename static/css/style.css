@@ -25,7 +25,23 @@ body.fh5co-offcanvas {
 }
 
 
+.dropdown-menu {
+  background-color: black;
+}
 
+.dropdown-item {
+  color: white;
+}
+
+.red:hover {
+  color: red;
+}
+
+.dropdown-toggle {
+  background-color: transparent;
+  border: transparent;
+  padding: 3px;
+}
 
 .login-form {
   margin-top: 100px;
@@ -247,7 +263,7 @@ figure {
 }
 
 .sf-menu a:hover, .sf-menu-2 a:hover, .sf-menu a:focus, .sf-menu-2 a:focus {
-  color: #fff !important;
+  color: red !important;
 }
 
 .sf-menu li.active a:hover, .sf-menu-2 li.active a:hover, .sf-menu li.active a:focus, .sf-menu-2 li.active a:focus {
