@@ -25,6 +25,41 @@ body.fh5co-offcanvas {
 }
 
 
+
+
+form.example input[type=text] {
+  padding: 10px;
+  font-size: 17px;
+  border: 1px solid grey;
+  float: left;
+  width: 60%;
+  height: 60%;
+  background: #f1f1f1;
+}
+
+form.example button {
+  float: left;
+  width: 20%;
+  padding: 10px;
+  background: #2196F3;
+  color: white;
+  font-size: 11px;
+  border: 1px solid grey;
+  border-left: none;
+  cursor: pointer;
+}
+
+form.example button:hover {
+  background: #0b7dda;
+}
+
+form.example::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+
 .dropdown-menu {
   background-color: black;
 }
@@ -415,6 +450,7 @@ figure {
   z-index: 0;
   display: block;
   float: right;
+  line-height: 0 !important;
 }
 
 #fh5co-primary-menu > li > ul li.active > a {
@@ -448,7 +484,7 @@ figure {
   font-weight: normal;
   font-variant: normal;
   text-transform: none;
-  line-height: 1;
+  line-height: 0 !important;
   /* Better Font Rendering =========== */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -456,7 +492,7 @@ figure {
   float: right;
   margin-right: -5px;
   top: 25%;
-  margin-top: -7px;
+  margin-top: -3px;
   content: "\e922";
   color: rgba(255, 255, 255, 0.5);
 }

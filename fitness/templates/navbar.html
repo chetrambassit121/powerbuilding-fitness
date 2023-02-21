@@ -52,7 +52,67 @@
                                     <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
                                 </ul>
                             </li>        {% endcomment %}
-                            <li><a href="#"><img class="round-circle post-img" height="35" width="35" src="{{ request.user.profile.picture.url }}" /></a></li>
+                            <li><a href="{% url 'show_profile_page' request.user.profile.pk %}"><img class="round-circle post-img" height="35" width="35" src="{{ request.user.profile.picture.url }}" /></a></li>
+                        {% else %}
+                            <li><a href="{% url 'login' %}">Login</a></li>
+                            <li><a href="{% url 'register' %}">Register</a></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+        <div class="container">
+            <div class="nav-header">
+                <a href="#" class="js-fh5co-nav-toggle fh5co-nav-toggle"><i></i></a>
+                <h3 id="fh5co-logo-2"><a href="{% url 'home' %}">Power<span>Building-Social</span></a></h3>
+                <!-- START #fh5co-menu-wrap -->
+                <nav id="fh5co-menu-wrap-2" role="navigation">
+                    <ul class="sf-menu" id="fh5co-primary-menu-2">
+                        {% comment %} <li class="active">
+                            <a href="{% url 'index' %}">Home</a>
+                        </li> {% endcomment %}
+                        {% comment %} <li>
+                            <a href="classes" class="fh5co-sub-ddown">Classes</a>
+                            <ul class="fh5co-sub-menu">
+                                <li><a href="#">Fitness</a></li>
+                                <li><a href="#">Branding &amp; Identity</a></li>
+                                <li><a href="#">UI Animation</a></li>
+                                <li><a href="#">Copywriting</a></li>
+                                <li><a href="#">Photography</a></li> 
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="{% url 'schedule' %}">Schedule</a>
+                        </li> {% endcomment %}
+                        <li><a href="{% url 'trainer' %}">Trainers</a></li>
+                        <li><a href="{% url 'about' %}">About</a></li>
+                        <li><a href="{% url 'contact' %}">Contact</a></li>
+                        {% if user.is_authenticated %}
+                            <li>
+                                <a href="classes" class="fh5co-sub-ddown">Account</a>
+                                <ul class="fh5co-sub-menu">
+                                    <li><a href="#">Settings</a></li>
+                                    <li><a href="#">Profile Page</a></li>
+                                    <li><a href="#">Edit Profile</a></li>
+                                    <li><a href="#">Inbox</a></li>
+                                    <li><a href="{% url 'logout' %}">Logout</a></li> 
+                                </ul>
+                            </li> 
+                            {% comment %} <li class="dropdown">
+                                <button class="dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                                <li><a href="#" class="user-settings">User Settings</a></li>   
+                                </button>
+                                <ul class="dropdown-menu " aria-labelledby="dropdownMenuButton1">
+                                    <li><a class="dropdown-item" href="{% url 'edit_profile' request.user.profile.pk %}">Edit User Settings</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'edit_profile_page' request.user.profile.pk %}">Edit Profile Page</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'show_profile_page' request.user.profile.pk %}">Show Profile Page</a></li> 
+                                    <li><a class="dropdown-item" href="#">Edit User Settings</a></li>
+                                    <li><a class="dropdown-item" href="#">Edit Profile Page</a></li>
+                                    <li><a class="dropdown-item" href="#">Show Profile Page</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
+                                </ul>
+                            </li>        {% endcomment %}
+                            {% comment %} <li><a href="{% url 'show_profile_page' request.user.profile.pk %}"><img class="round-circle post-img" height="35" width="35" src="{{ request.user.profile.picture.url }}" /></a></li> {% endcomment %}
                         {% else %}
                             <li><a href="{% url 'login' %}">Login</a></li>
                             <li><a href="{% url 'register' %}">Register</a></li>
@@ -63,6 +123,8 @@
         </div>
     </header>		
 </div>
+
+
 {% comment %} <div id="fh5co-header">
     <header id="fh5co-header-section">
         <div class="container">
@@ -76,3 +138,13 @@
         </div>
     </header>
 </div> {% endcomment %}
+
+
+
+
+{% comment %} {% if user.is_authenticated %}
+                            <li><a><form class="example" style="" method="GET" action="{% url 'profile-search' %}">
+                                <input type="text" placeholder="User Search" name="search2">
+                                <button type="submit"><i class="fa fa-search"></i></button>
+                            </form></a></li>
+                        {%endif%} {% endcomment %}
