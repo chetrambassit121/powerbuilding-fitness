@@ -62,20 +62,33 @@ form.example::after {
 
 
 /* notification badge  */
+.badge-primary {
+  font-size: 15px !important;
+  margin-left: 10px;
+  margin-top: 2.5px;
+}
 
 .notification {
-  background-color: blue;
+  background-color: red;
   color: white;
   text-decoration: none;
-  padding: 15px 26px;
+  padding: 3px;
   margin-left: 10px;
   position: relative;
   display: inline-block;
   border-radius: 2px;
 }
 
+.notification-2 {
+  background-color: blue !important;
+}
+
+.notification-text {
+  color: #000;
+}
+
 .notification:hover {
-  background: red;
+  background: rgb(109, 19, 19);
 }
 
 .notification .badge {
@@ -85,7 +98,7 @@ form.example::after {
   padding: 5px 10px;
   border-radius: 50%;
   background: red;
-  color: white;
+  color: black;
 }
 
 .dropdown-menu {
@@ -471,11 +484,12 @@ figure {
   z-index: 2;
   display: block;
   float: right;
+  line-height: 0 !important;
 }
 
 #fh5co-menu-wrap-2 {
   position: relative;
-  z-index: 0;
+  z-index: 2;
   display: block;
   float: right;
   line-height: 0 !important;
