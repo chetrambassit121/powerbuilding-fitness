@@ -101,6 +101,10 @@ form.example::after {
   color: black;
 }
 
+.profile-badge {
+  line-height: 0 !important;
+}
+
 .dropdown-menu {
   background-color: black;
 }
@@ -451,7 +455,7 @@ figure {
 #fh5co-logo a, #fh5co-logo-2 a  {
   position: relative;
 }
-#fh5co-logo a:after, #fh5co-logo-2 a:after {
+#fh5co-logo a:after {
   position: absolute;
   content: '';
   top: -5px;
@@ -460,6 +464,7 @@ figure {
   width: 10px;
   height: 10px;
 }
+
 #fh5co-logo span, #fh5co-logo-2 span {
   padding: 0;
   margin: 0;
